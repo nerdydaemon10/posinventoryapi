@@ -80,7 +80,7 @@ class RefreshAPIView(APIView):
                 )
             return success_response(
                 message="Refresh token is successfully refreshed.",
-                status_code=status.HTTP_200_OK
+                status_code=status. HTTP_200_OK
             )
         except TokenError:
             return error_response(
