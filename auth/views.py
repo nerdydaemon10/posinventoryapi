@@ -4,7 +4,6 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from core.helpers import error_response, success_response
 from core.response.response_factory import ResponseFactory
 from posinventoryapi import settings
 from .serializers import LoginSerializer, RefreshSerializer
@@ -58,8 +57,11 @@ class LoginAPIView(APIView):
 
 class LogoutAPIView(APIView):
     def post(self):
-        response = success_response(message="Logout successfully!")
-
+        response = (ResponseFactory
+                    .create_success()
+                    .set_message("Logout successfully!")
+                    .build()
+                    )
         response.delete_cookie(settings.SIMPLE_JWT["AUTH_COOKIE"])
         response.delete_cookie("refresh_token")
 
@@ -74,17 +76,22 @@ class RefreshAPIView(APIView):
 
         try:
             if not serializer.is_valid(raise_exception=True):
-                return success_response(
-                    message="Refresh token is required.",
-                    status_code=status.HTTP_200_OK
-                )
-            return success_response(
-                message="Refresh token is successfully refreshed.",
-                status_code=status. HTTP_200_OK
-            )
+                return (ResponseFactory
+                        .create_error()
+                        .set_message("Refresh token is required.")
+                        .build()
+                        )
+            return (ResponseFactory
+                    .create_success()
+                    .set_message("Refresh token successfully refreshed.")
+                    .set_data(serializer.validated_data["access_token"])
+                    .buid()
+                    )
         except TokenError:
-            return error_response(
-                message="Refresh token is invalid or expired.",
-                status_code=status.HTTP_401_UNAUTHORIZED
-            )
+            return (ResponseFactory
+                    .create_error()
+                    .set_code(status.HTTP_401_UNAUTHORIZED)
+                    .set_message("Refresh token is invalid or expired.")
+                    .build()
+                    )
 
