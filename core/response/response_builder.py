@@ -1,6 +1,4 @@
-import pydash
 from rest_framework.response import Response
-
 from posinventoryapi import settings
 
 
@@ -41,17 +39,16 @@ class ResponseBuilder:
         }
 
         response = Response(data=data, status=self.code)
+        cookies = { k: v for cookie in self.cookies for k, v in cookie.items() }
 
-        if not pydash.is_empty(self.cookies):
-            for cookie in self.cookies:
-                for key, value in cookie.items():
-                    response.set_cookie(
-                        key=key,
-                        value=value,
-                        httponly=True,
-                        secure=settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"],
-                        samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
-                        path=settings.SIMPLE_JWT["AUTH_COOKIE_PATH"]
-                    )
+        for key, value in cookies.items():
+            response.set_cookie(
+                key=key,
+                value=value,
+                httponly=True,
+                secure=settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"],
+                samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
+                path=settings.SIMPLE_JWT["AUTH_COOKIE_PATH"]
+            )
 
         return response
