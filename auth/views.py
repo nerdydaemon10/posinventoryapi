@@ -27,6 +27,7 @@ class LoginAPIView(APIView):
 
         username, password = (serializer.validated_data['username'],
                               serializer.validated_data['password'])
+        
         user = authenticate(username=username, password=password)
 
         if user is None:
